@@ -8,6 +8,15 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Bootstrap이 쓰는 변수 재정의 */
+:root {
+  --bs-body-font-family: 'Orbit', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* 전역 폰트 지정 */
+body {
+  font-family: var(--bs-body-font-family);
 }
