@@ -1,8 +1,6 @@
 
 import './App.css';
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
+
 
 // 분리된 리액트 컴포넌트 import
 import MenuItems from './ui/MenuItems';
@@ -13,14 +11,7 @@ function App() {
 
   return (
     <>
-      <Navbar bg="dark" variant='dark' expand="lg">
-        <Container>
-          <Navbar.Brand href='/'>{appName}</Navbar.Brand>
-          <Nav className='me-auto'>
-            <MenuItems />
-          </Nav>
-        </Container>
-      </Navbar>
+      <MenuItems appName={appName} />
 
       {/* 분리된 라우터 정보 */}
       <AppRoutes />
