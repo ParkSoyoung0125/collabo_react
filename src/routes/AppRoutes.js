@@ -6,11 +6,12 @@ import Element from './../pages/Element';
 import ElementList from './../pages/ElementList';
 import SignupPage from './../pages/SignupPage';
 import LoginPage from './../pages/LoginPage';
-import LogoutPage from './../pages/LogoutPage';
+import ProductList from './../pages/ProductList';
+
 
 // 이 파일은 라우팅 정보를 담고있는 파일임.
 // 이런 파일(작성중인 지금 파일)을 네트워크에서는 routing table이라고 함.
-function App({ user, handleLoginSuccess, logout }) {
+function App({ user, handleLoginSuccess }) {
     // user : 사용자 정보를 저장하고 있는 객체
     // handleLoginSuccess : 로그인 성공시 동작할 액션
     return (
@@ -22,11 +23,13 @@ function App({ user, handleLoginSuccess, logout }) {
             <Route path='/element' element={<Element />} />
             <Route path='/element/list' element={<ElementList />} />
 
+            {/* 로그인 여부에 따라 상품 목록 페이지가 다르게 보여야하므로 user 프롭스를 넘김 */}
+            <Route path='/product/list' element={<ProductList user={user} />} />
+
             <Route path='/member/signup' element={<SignupPage />} />
 
             <Route path='/member/login' element={<LoginPage setUser={handleLoginSuccess} />} />
 
-            <Route path='/member/logout' element={<LogoutPage setUser={logout} />} />
         </Routes>
     );
 }
