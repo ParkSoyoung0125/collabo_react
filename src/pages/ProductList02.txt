@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { API_BASE_URL } from "../config/config";
 import axios from "axios";
-import { Link, StaticRouterProvider, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 /* 
 step 01
@@ -14,7 +14,6 @@ step 02
 사용자 정보가 'ADMIN'이면, 등록/수정/삭제 버튼이 보이게 코딩
 삭제 버튼에 대한 기능 구현
 */
-
 
 function App({ user }) {
     // 스프링에서 넘겨받은 상품목록 state
@@ -68,13 +67,7 @@ function App({ user }) {
                             // 상품을 삭제 후 다시 상품 목록 페이지를 보여줌.
                             // 주의) 상품을 삭제하려면 반드시 PK인 상품의 id를 넘겨줘야함.
                             await axios.delete(`${API_BASE_URL}/product/delete/${item.id}`);
-
-                            // alert 함수(modal통신)와 비동기 통신 사용 시, 화면 갱신에 유의해야 함.
                             alert(`'${item.name} 상품이 삭제되었습니다.'`);
-
-                            // 삭제된 id를 배제하고, 상품 목록 state를 다시 갱신
-                            setProducts(prev => prev.filter(p => p.id !== item.id));
-
                             navigate(`/product/list`);
                         } catch (error) {
                             console.log(error)
@@ -91,7 +84,7 @@ function App({ user }) {
     return (
         <Container className="my-4">
             <h1>상품 목록 페이지</h1>
-            <Link to={'product/insert'}>
+            <Link to={'product/list'}>
                 {user?.role === 'ADMIN' && (
                     <Button variant="primary" className="mb-3">
                         상품등록

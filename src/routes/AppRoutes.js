@@ -7,6 +7,7 @@ import ElementList from './../pages/ElementList';
 import SignupPage from './../pages/SignupPage';
 import LoginPage from './../pages/LoginPage';
 import ProductList from './../pages/ProductList';
+import ProductInsertForm from './../pages/ProductInsertFrom';
 
 
 // 이 파일은 라우팅 정보를 담고있는 파일임.
@@ -25,6 +26,7 @@ function App({ user, handleLoginSuccess }) {
 
             {/* 로그인 여부에 따라 상품 목록 페이지가 다르게 보여야하므로 user 프롭스를 넘김 */}
             <Route path='/product/list' element={<ProductList user={user} />} />
+            <Route path='/product/insert' element={<ProductInsertForm />} />
 
             <Route path='/member/signup' element={<SignupPage />} />
 
