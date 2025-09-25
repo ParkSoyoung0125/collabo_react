@@ -47,7 +47,7 @@ function App({ user }) {
                     size="sm"
                     onClick={(event) => {
                         event.stopPropagation();
-                        alert('수정')
+                        navigate(`/product/update/${item.id}`);
                     }}>
                     수정
                 </Button>
@@ -91,7 +91,7 @@ function App({ user }) {
     return (
         <Container className="my-4">
             <h1>상품 목록 페이지</h1>
-            <Link to={'product/insert'}>
+            <Link to={'/product/insert'}>
                 {user?.role === 'ADMIN' && (
                     <Button variant="primary" className="mb-3">
                         상품등록

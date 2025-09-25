@@ -1,13 +1,33 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Container, Form } from "react-bootstrap";
 import { API_BASE_URL } from "../config/config";
 import { useNavigate } from "react-router-dom";
 
-/*  
-상품 등록이 회원가입과 다른 점은 "파일 업로드"를 한다는 점.
+// useParams 훅은 url에 들어있는 동적 파라미터의 값을 챙길 때 사용함.
+import { useParams } from "react-router-dom";
 
-STEP01 : 폼 양식을 만듦
+
+/*  
+상품 수정 페이지.
+
+상품 등록과 다른 점
+    기본 키인 상품의 id 정보가 넘어옴.
+    id를 사용하여 기존에 입력했던 상품에 대한 정보를 미리 보여줘야 함.(useEffect 훅 사용)
+
+STEP01 :
+기존 insert 폼 양식을 복사함.
+
+기존 상품 정보 읽기
+    get 방식을 이용하여 해당 상품의 정보를 읽어옴.
+
+테스트 시나리오
+   특정 상품에 대하여 '수정' 버튼을 클릭하면, 이전 상품 정보들이 입력란에 보여야합니다.
+
+    다음 함수들은 상품 등록과 동일합니다.
+    ControlChange 함수
+    FileSelect 함수   
+    
 ControlChange
     각 컨트롤에 대한 Change 이벤트 함수를 구현함 
     컨트롤(input type) : 이름, 가격, 재고, 상세설명
@@ -17,6 +37,9 @@ FileSelect 함수
     FileReader API를 사용해서 해당 이미지를 Base64 인코딩 문자열로 변환 작업을 함.
 
 SubmitAction 함수
+    "등록"으로 된 문구 전부 "수정"으로 변경.
+    'insert' → 'update/${id}'로 변경
+    axios.post → axios.put으로 변경
     컨트롤에 입력된 내용들을 BackEnd로 전송함. 
 
 파일 업로드 시 유의 사항
@@ -24,21 +47,46 @@ SubmitAction 함수
     input 양식의 type="file"으로 작성
 
 테스트 시나리오
-이미지 폴더에 "product_"로 시작하는 이미지가 업로드 되어야함.
-데이터 베이스에 1행이 추가되야함
-상품 목록 1페이지의 1번쨰에 이미지가 보여야함
+    이미지 폴더에 "product_"로 시작하는 이미지가 업로드 되어야함.
+    데이터 베이스에 이전 정보가 수정되야함
+    상품 목록 페이지에 수정된 정보가 보여야함 
+
+미결사항
+    과거에 업로드 했던 예전 이미지를 삭제해야함.
 */
 function App() {
-    const comment = '상품 등록';
+    const { id } = useParams();
+    console.log(`수정할 상품 번호 : ${id}`);
+
+    const comment = '상품 수정';
 
     const initial_value = {// 상품 객체 정보
         name: '', price: '', category: '', stock: '', image: '', description: ''
     };
 
-    const navigate = useNavigate();
 
     // ↓ product : 백엔드에게 넘겨줄 상품 등록 정보를 담고 있는 객체.
     const [product, setProduct] = useState(initial_value);
+
+    const navigate = useNavigate();
+
+    // id를 이용하여 기존에 입력한 상품 정보 가져오기
+    useEffect(() => {
+        const url = `${API_BASE_URL}/product/update/${id}`;
+
+        axios.get(url)
+            .then((response) => {
+                setProduct(response.data);
+            })
+            .catch((error) => {
+                console.log(`상품 ${id}번 오류 발생 : ${error}`);
+                alert('해당 상품 정보를 읽어오지 못했습니다.');
+            });
+
+    }, [id]) // id 값이 변경될 때마다 화면 리렌더링
+
+
+
 
     // 폼 양식에서 어떤 컨트롤의 값이 변경되면 함수에 값이 들어옴
     const ControlChange = (event) => {
@@ -79,11 +127,12 @@ function App() {
         event.preventDefault();
         if (product.category === "-") {
             alert("카테고리를 선택해주세요.")
-            return; // 등록 중단
+            return; // 수정 중단
         }
 
         try {
-            const url = `${API_BASE_URL}/product/insert`;
+            // const url = `${API_BASE_URL}/product/update/${id}`;
+            const url = `${API_BASE_URL}/product/update/${id}`;
 
             // 참조 복사 : 두 변수가 동일한 곳을 참조함.
             const parameters = product;
@@ -98,20 +147,21 @@ function App() {
             // 이 문서는 json 형식의 파일임.
             const config = { headers: { 'Content-Type': 'application/json' } };
 
-            const response = await axios.post(url, parameters, config);
+            // put()은 리소스를 수정하고자 할 때 사용되는 메소드.
+            const response = await axios.put(url, parameters, config);
 
-            console.log(`상품 등록 : [${response.data}]`);
-            alert('상품이 성공적으로 등록 되었습니다.')
+            console.log(`상품 수정 : [${response.data}]`);
+            alert('상품이 성공적으로 수정 되었습니다.')
 
-            // 상품 등록 후 입력 컨트롤은 모두 초기화되야 함.
+            // 상품 수정 후 입력 컨트롤은 모두 초기화되야 함.
             setProduct(initial_value);
 
-            // 등록이 이루어지고 난 후 상품 목록 페이지로 이동함.
+            // 수정이 이루어지고 난 후 상품 목록 페이지로 이동함.
             navigate('/product/list');
 
         } catch (error) {
             console.log(`오류 내용 : ${error}`);
-            alert('상품 등록에 실패했습니다.')
+            alert('상품 수정에 실패했습니다.')
             console.log(error.response?.data); // 서버가 반환한 에러 메시지
             console.log(error.response?.status); // 상태 코드
         }
