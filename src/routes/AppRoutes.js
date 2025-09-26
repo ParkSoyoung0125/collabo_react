@@ -9,6 +9,7 @@ import LoginPage from './../pages/LoginPage';
 import ProductList from './../pages/ProductList';
 import ProductInsertForm from './../pages/ProductInsertFrom';
 import ProductUpdateForm from './../pages/ProductUpdateForm';
+import ProductDetail from './../pages/ProductDetail';
 
 
 // 이 파일은 라우팅 정보를 담고있는 파일임.
@@ -31,6 +32,9 @@ function App({ user, handleLoginSuccess }) {
 
             {/* 기호 ":id"는 변수처럼 동작하는 매개변수, ProductUpdateForm.js파일에서 참조함. */}
             <Route path='/product/update/:id' element={<ProductUpdateForm />} />
+
+            {/* 미로그인 시 '장바구니'와 '구매' 기능이 선택 불가여야 하므로, user를 프롭스로 넘기기 */}
+            <Route path='/product/detail/:id' element={<ProductDetail user={user} />} />
 
             <Route path='/member/signup' element={<SignupPage />} />
 
