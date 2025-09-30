@@ -168,50 +168,6 @@ function App({ user }) {
         }
     }
 
-    // 사용자가 주문하기 버튼을 클릭하였음.
-    const makeOrder = async () => {
-        const selectedProducts = cartProducts.filter((bean) => bean.checked);
-        if (selectedProducts.length === 0) {
-            alert('주문할 상품을 선택해주세요.')
-            return;
-        }
-
-        try {
-            const url = `${API_BASE_URL}/order`;
-
-            // 스프링 부트의 OrderDto, OrderItemDto 클래스와 연관이 있음.
-            // 주의) parameters 작성시 key의 이름은 OrderDto의 변수 이름과 동일하게 작성해야 함.
-            const parameters = {
-                memberId: user.id,
-                status: 'PENDING',
-                orderItems: selectedProducts.map((product) => ({
-                    cartProductId: product.cartProductId,
-                    productId: product.productId,
-                    quantity: product.quantity
-                }))
-            };
-
-            console.log('주문할 데이터 정보');
-            console.log(parameters);
-
-            const response = await axios.post(url, parameters);
-            alert(response.data);
-
-            // 방금 주문한 품목은 장바구니 목록에서 제거되어야 함.
-            setCartProducts((previous) =>
-                previous.filter((product) => !product.checked) // 주문한 상품 제거하기
-            );
-
-            setOrderTotalPrice(0)// 총 주문 금액 초기화
-
-        } catch (error) {
-            console.log('주문 실패');
-            console.log(error);
-        };
-        alert('주문 성공');
-
-    }
-
     return (
         <Container className="mt-4">
             <h2 className="mb-4">
@@ -291,7 +247,7 @@ function App({ user }) {
                             </tr>
                         ))
                     ) : (
-                        <tr><td colSpan={5}>장바구니가 비어 있습니다.</td></tr>
+                        <tr><td>장바구니가 비어 있습니다.</td></tr>
                     )}
                 </tbody>
             </Table>
@@ -299,7 +255,7 @@ function App({ user }) {
             {/* 좌측 정렬(text-start), 가운데 정렬(text-center), 우측 정렬(text-end) */}
             <h3 className="text-end mt-3">총 주문 금액 : {orderTotalPrice.toLocaleString()}원</h3>
             <div className="text-end">
-                <Button variant="primary" size="lg" onClick={makeOrder}>
+                <Button variant="primary" size="lg" onClick={``}>
                     주문하기
                 </Button>
             </div>

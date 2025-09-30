@@ -100,6 +100,87 @@ function App({ user }) {
         }
     };
 
+    // const buyNow = async () => {
+    //     if (quantity < 1) {
+    //         alert('수량을 1개 이상 선택해주셔야 합니다.')
+    //         return;
+    //     }
+
+    //     try {
+    //         const url = `${API_BASE_URL}/order`;
+
+    //         // 스프링 부트의 OrderDto, OrderItemDto 클래스와 연관이 있음.
+    //         // 주의) parameters 작성시 key의 이름은 OrderDto의 변수 이름과 동일하게 작성해야 함.
+    //         const parameters = {
+    //             memberId: user.id,
+    //             status: 'PENDING',
+    //             orderItems: selectedProducts.map((product) => ({
+    //                 cartProductId: product.cartProductId,
+    //                 productId: product.productId,
+    //                 quantity: product.quantity
+    //             }))
+    //         };
+
+    //         console.log('주문할 데이터 정보');
+    //         console.log(parameters);
+
+    //         const response = await axios.post(url, parameters);
+    //         alert(response.data);
+
+    //         // 방금 주문한 품목은 장바구니 목록에서 제거되어야 함.
+    //         setCartProducts((previous) =>
+    //             previous.filter((product) => !product.checked) // 주문한 상품 제거하기
+    //         );
+
+    //         setOrderTotalPrice(0)// 총 주문 금액 초기화
+
+    //     } catch (error) {
+    //         console.log('주문 실패');
+    //         console.log(error);
+    //     };
+    //     alert('주문 성공');
+
+    // }
+
+    const buyNow = async () => {
+        // 체크박스가 on 상태인 것만 필터링함.
+        if (quantity < 1) {
+            alert('수량을 1개 이상 선택해주셔야 합니다.')
+            return;
+        }
+
+        try {
+            const url = `${API_BASE_URL}/order`;
+
+            // 스프링 부트의 OrderDto, OrderItemDto 클래스와 연관이 있음.
+            // 주의) parameters 작성시 key의 이름은 OrderDto의 변수 이름과 동일하게 작성해야 함.
+            // 상품 상세보기 페이지에서는 무조건 1개의 상품만 주문할 수 있음.
+            const parameters = {
+                memberId: user.id,
+                status: 'PENDING',
+                orderItems: [{
+                    productId: product.id,
+                    quantity: quantity
+                }]
+            };
+
+            console.log('주문할 데이터 정보');
+            console.log(parameters);
+
+            const response = await axios.post(url, parameters);
+            alert(response.data);
+            alert(`${product.name} ${quantity}개를 주문하였습니다.`);
+
+            navigate('/product/list'); // 목록 페이지로 이동
+
+        } catch (error) {
+            console.log('주문 실패');
+            console.log(error);
+        };
+        alert('주문 성공');
+
+    }
+
     return (
         <Container className="my-4">
             <Card>
@@ -176,8 +257,17 @@ function App({ user }) {
                                     }}>
                                     장바구니
                                 </Button>
-                                <Button variant="success" className="me-3 px-4">
-                                    구매하기
+                                <Button variant="success" className="me-3 px-4"
+                                    onClick={() => {
+                                        if (!user) {
+                                            alert("로그인이 필요한 서비스 입니다.");
+                                            return navigate('/member/login');
+                                        } else {
+                                            buyNow();
+                                        }
+                                    }}
+                                >
+                                    주문하기
                                 </Button>
                             </div>
                         </Card.Body>
