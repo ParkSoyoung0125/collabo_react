@@ -1,80 +1,139 @@
 import { useEffect, useState } from "react";
-import { Container, Table, Form } from "react-bootstrap";
+import { Container, Table, Form, Spinner, Alert, Row, Col, Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config/config";
 import axios from "axios";
 
 function App({ user }) {
-    const thStyle = { fontSize: '1.2rem' }; // 테이블 헤더 스타일
-    const [orderList, setOrderList] = useState([]); // 나열할 주문 내역 리스트
+    // loading이 true이면 현재 데이터를 읽고 있는 중임.
+    const [loading, setLoading] = useState(true);
+
+    // 오류 정보를 저장할 스테이트
+    const [error, setError] = useState('');
+
+    // 주문 목록들을 저장할 스테이트(초기 값 : 빈 배열)
+    const [orders, setOrders] = useState([]);
+
     const navigate = useNavigate();
 
-
-    const toggleAllCheckBox = (isAllCheck) => {
-        // isAllCheck : `전체 선택` 체크 박스의 boolean 값
-        setOrderList((previous) => {
-            // 모든 객체(카트 상품)들의 나머지 속성은 보존하고, 체크 상태(checked)를 
-            // `전체 선택` 체크 상태와 동일하게 설정합니다.
-            const updatedProducts = previous.map((product) => ({
-                ...product,
-                checked: isAllCheck
-            }));
-
-            return updatedProducts;
-        });
-    };
-
+    // 다음 hook은 사용자 정보 user가 변경될 때 마다 rerendering 됨.
     useEffect(() => {
-        if (user && user?.id) {
-            totalOrderList();
+        if (!user) {
+            setError('로그인이 필요합니다.');
+            setLoading(false);
         }
+
+        // 스프링 부트의 OrderController의 gerOrderList() 메소드 참조
+        const fetchOrders = async () => {
+            try {
+                const url = `${API_BASE_URL}/order/list`;
+
+                // GET 방식은 파라미터를 넘길 때, params라는 키를 사용하여 넘겨야 한다.
+                // 여기서 role은 관리자 유무를 판단하기 위해 넘겨줌.
+                const parameters = { params: { memberId: user.id, role: user.role } };
+
+                const response = await axios.get(url, parameters);
+                setOrders(response.data);
+
+            } catch (error) {
+                setError('주문 목록을 불러오는 데에 실패하였습니다.');
+                console.log(error);
+            } finally {
+                setLoading(false);
+            };
+        };
+
+        fetchOrders(); // 함수 호출
+
     }, [user]);
 
-    // 테이블에 주문 내역 리스트 배열하기
-    const totalOrderList = async (or) => {
-
-        try {
-            const url = `${API_BASE_URL}/order/orderList`;
-            const response = await axios.post(url);
-
-            setOrderList(response.data);
-        } catch (error) {
-            console.log(error);
-        }
+    const deleteOrder = (deleteId) => {
+        alert(`삭제할 주문 번호 : ${deleteId}`);
     }
 
-    // 체크 박스 선택 후 삭제 시 주문 내역 삭제
+    // 관리자를 위한 컴포넌트, 함수
+    const makeAdminButton = (bean) => {
+        if (user?.role !== "ADMIN") return null;
 
+        return (
+            <div>
+                <Button
+                    variant="warning"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => {
+                        // navigate()에 URL을 넣으면 기본적으로 현재 SPA(root) 경로를 기준으로 상대 경로를 계산해줍니다.
+                        // 따라서, 자바 스크립트의 location 객체의 href 속성을 이용하면 해결 가능합니다.
+                        window.location.href = `${API_BASE_URL}/order/update/${bean.orderId}`;
+                    }}
+                >
+                    수정
+                </Button>
+                <Button
+                    variant="danger"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => deleteOrder(bean.orderId)}
+                >
+                    삭제
+                </Button>
+            </div>
+        );
+    }
 
+    if (loading) {
+        return (
+            <div className="d-flex justify-content-center align-items-center p-5">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">주문 목록을 불러오는 중입니다.</span>
+                </Spinner>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container className="my-4">
+                <Alert variant="danger">{error}</Alert>
+            </Container>
+        );
+    }
 
     return (
-        <Container className="mt-4">
-            <h2 className="mb-4">주문 내역</h2>
-            <Table striped bordered>
-                <thead>
-                    <tr>
-                        <th style={{ ...thStyle, width: '20%' }}>
-                            {/* `전체 선택` 체크 박스의 체크 상태(boolean)를 toggleAllCheckBox 함수에 전달 */}
-                            <Form.Check
-                                type="checkbox"
-                                label="전체 선택"
-                                onChange={(event) => toggleAllCheckBox(event.target.checked)}
-                            />
-                        </th>
-                        <th style={thStyle}>구매 내역</th>
-                        <th style={thStyle}>구매 금액</th>
-                        <th style={thStyle}>구매일</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
+        <Container className="my-4">
+            <h1 className="my-4">주문 내역</h1>
 
-                        </td>
-                    </tr>
-                </tbody>
+            {orders.length === 0 ? (
+                <Alert variant="secondary">주문 내역이 없습니다.</Alert>
+            ) : (<>
+                <h5>현재까지 {orders.length} 개를 주문하셨습니다.</h5>
+                <Row>
+                    {orders.map((bean) => (
+                        <Col key={bean.orderId} md={6} className="mb-4">
+                            <Card className="h-100 shadow-sm">
+                                <Card.Body>
+                                    <div className="d-flex justify-content-between">
+                                        <Card.Title>주문 번호 : {bean.orderId}</Card.Title>
+                                        <small className="text-muted">{bean.orderDate}</small>
+                                    </div>
+                                    <Card.Text>
+                                        상태 : <strong>{bean.status}</strong>
+                                    </Card.Text>
+                                    <ul style={{ paddingLeft: "20px" }}>
+                                        {bean.orderItems.map((item, index) => (
+                                            <li key={index}>{item.productName}({item.quantity}개)</li>
+                                        ))}
+                                    </ul>
+                                    {/* 관리자 전용 버튼 생성 */}
+                                    {makeAdminButton(bean)}
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+            </>
+            )}
 
-            </Table>
         </Container>
     );
 }

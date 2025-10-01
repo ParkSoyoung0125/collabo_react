@@ -38,7 +38,7 @@ function App({ user, handleLoginSuccess }) {
 
             <Route path='/cart/list' element={<CartList user={user} />} />
 
-            <Route path='/order/orderlist' element={<OrderList user={user} />} />
+            <Route path='/order/list' element={<OrderList user={user} />} />
 
             <Route path='/fruit' element={<FruitOne />} />
             <Route path='/fruit/list' element={<FruitList />} />
