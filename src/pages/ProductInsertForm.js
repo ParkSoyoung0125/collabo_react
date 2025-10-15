@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Container, Form } from "react-bootstrap";
 import { API_BASE_URL } from "../config/config";
 import { useNavigate } from "react-router-dom";
@@ -28,14 +28,20 @@ SubmitAction 함수
 데이터 베이스에 1행이 추가되야함
 상품 목록 1페이지의 1번쨰에 이미지가 보여야함
 */
-function App() {
+function App({ user }) {
+    const navigate = useNavigate();
     const comment = '상품 등록';
+
+    useEffect(() => {
+        if (!user || user.role !== 'ADMIN') {
+            alert(`${comment} 기능은 관리자만 접근 가능합니다.`);
+            navigate('/');
+        }
+    }, [user, navigate]);
 
     const initial_value = {// 상품 객체 정보
         name: '', price: '', category: '', stock: '', image: '', description: ''
     };
-
-    const navigate = useNavigate();
 
     // ↓ product : 백엔드에게 넘겨줄 상품 등록 정보를 담고 있는 객체.
     const [product, setProduct] = useState(initial_value);

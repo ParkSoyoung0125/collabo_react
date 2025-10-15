@@ -133,7 +133,7 @@ function App({ user }) {
                         try {
                             // 상품을 삭제 후 다시 상품 목록 페이지를 보여줌.
                             // 주의) 상품을 삭제하려면 반드시 PK인 상품의 id를 넘겨줘야함.
-                            await axios.delete(`${API_BASE_URL}/product/delete/${item.id}`);
+                            await axios.delete(`${API_BASE_URL}/product/delete/${item.id}`, { withCredentials: true });
 
                             // alert 함수(modal통신)와 비동기 통신 사용 시, 화면 갱신에 유의해야 함.
                             alert(`'${item.name} 상품이 삭제되었습니다.'`);

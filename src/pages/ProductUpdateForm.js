@@ -54,11 +54,15 @@ SubmitAction 함수
 미결사항
     과거에 업로드 했던 예전 이미지를 삭제해야함.
 */
-function App() {
+function App({ user }) {
     const { id } = useParams();
+    const navigate = useNavigate();
+
     console.log(`수정할 상품 번호 : ${id}`);
 
     const comment = '상품 수정';
+
+
 
     const initial_value = {// 상품 객체 정보
         name: '', price: '', category: '', stock: '', image: '', description: ''
@@ -68,13 +72,18 @@ function App() {
     // ↓ product : 백엔드에게 넘겨줄 상품 등록 정보를 담고 있는 객체.
     const [product, setProduct] = useState(initial_value);
 
-    const navigate = useNavigate();
+
 
     // id를 이용하여 기존에 입력한 상품 정보 가져오기
     useEffect(() => {
+        if (!user || user.role !== 'ADMIN') {
+            alert(`${comment} 기능은 관리자만 접근 가능합니다.`);
+            navigate('/');
+        }
+
         const url = `${API_BASE_URL}/product/update/${id}`;
 
-        axios.get(url)
+        axios.get(url, { withCredentials: true })
             .then((response) => {
                 setProduct(response.data);
             })
@@ -177,7 +186,7 @@ function App() {
                         type="text"
                         placeholder="이름을 입력해주세요."
                         name="name"
-                        value={product.name}
+                        value={product.name || ''}
                         onChange={ControlChange}
                         required
                     />
@@ -188,7 +197,7 @@ function App() {
                         type="text"
                         placeholder="가격을 입력해주세요."
                         name="price"
-                        value={product.price}
+                        value={product.price || ''}
                         onChange={ControlChange}
                         required
                     />
@@ -197,7 +206,7 @@ function App() {
                     <Form.Label>카테고리</Form.Label>
                     <Form.Select
                         name="category"
-                        value={product.category}
+                        value={product.category || ''}
                         onChange={ControlChange}
                         required>
                         {/* 주의) 자바의 ENUM 열거형 타입에서 사용한 대문자를 반드시 사용해야함 */}
@@ -214,7 +223,7 @@ function App() {
                         type="text"
                         placeholder="재고수량을 입력해주세요."
                         name="stock"
-                        value={product.stock}
+                        value={product.stock || ''}
                         onChange={ControlChange}
                         required
                     />
@@ -235,7 +244,7 @@ function App() {
                         type="text"
                         placeholder="상품 설명을 입력해주세요."
                         name="description"
-                        value={product.description}
+                        value={product.description || ''}
                         onChange={ControlChange}
                         required
                     />
